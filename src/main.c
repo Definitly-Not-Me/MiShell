@@ -1,21 +1,51 @@
+#include <ctype.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char *argv[]) {
   // Flush after every printf
   setbuf(stdout, NULL);
 
+  // Entree
+  char raw_input[BUFSIZ];
+
   printf("$ ");
-  char cmd[BUFSIZ];
-  if (fgets(cmd, sizeof(cmd), stdin) && cmd[0] != '\n' && cmd[0] != '\t' &&
-      cmd[0] != ' ') {
-    for (int i = 0; i < BUFSIZ; i++) {
-      if (cmd[i] == '\n')
-        cmd[i] = '\0';
-    }
-    printf("%s: command not found\n", cmd);
-    return 0;
-  } else {
+  while (fgets(raw_input, sizeof(raw_input), stdin)) {
+
+    // Tableau contenant les mots dans l'entree
+    char *command[BUFSIZ];
+    int k = 0;
+
+    // Chaine de charactere representant le mot courant
+    char token[FILENAME_MAX];
+    token[0] = '\0';
+    int j = 0;
+
+    // Parse (elimine les espaces pour recupere uniquement les mots)
+    for (int i = 0;
+         raw_input[i] != '\0' && k < BUFSIZ && j < (FILENAME_MAX - 1); i++) {
+
+      if (!isspace((unsigned char)raw_input[i])) {
+
+        token[j] = raw_input[i];
+
+        j++;
+      } else {
+
+        if (token[0] != '\0') {
+
+          token[j] = '\0';
+          command[k] = strdup(token);
+          k++;
+        };
+
+        j = 0;
+      };
+    };
+
+    if (command[0] != NULL && command[0][0] != '\0')
+      printf("%s: command not found\n", command[0]);
+
     printf("$ ");
   };
   return 0;
