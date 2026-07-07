@@ -7,6 +7,7 @@ typedef enum {
   EXIT,
   NOT_FOUND,
   ECHO,
+  TYPE,
 } Keywords;
 
 // Arguments recu de l'entree
@@ -18,6 +19,7 @@ typedef struct {
 // --- Les functions (Prototypes) ---
 Keywords get_command(char *name);
 char *echo(int argc, char *argv[]);
+char *type(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
   // Flush after every printf
@@ -29,8 +31,11 @@ int main(int argc, char *argv[]) {
   printf("$ ");
   while (fgets(raw_input, sizeof(raw_input), stdin)) {
 
-    // Structure contenant les mots dans l'entree
+    // Structure contenant les arguments dans l'entree
     args command;
+
+    command.argv[0] = strdup("\0");
+
     // Chaine de charactere representant le mot courant
     char token[FILENAME_MAX];
     token[0] = '\0';
@@ -67,6 +72,9 @@ int main(int argc, char *argv[]) {
       case ECHO:
         echo(command.argc, command.argv);
         break;
+      case TYPE:
+        type(command.argc, command.argv);
+        break;
       }
     };
 
@@ -84,6 +92,8 @@ Keywords get_command(char *name) {
     return EXIT;
   if (strcmp(name, "echo") == 0)
     return ECHO;
+  if (strcmp(name, "type") == 0)
+    return TYPE;
   return NOT_FOUND;
 };
 
@@ -94,5 +104,19 @@ char *echo(int argc, char *argv[]) {
   for (int i = 1; i < argc; i++)
     printf("%s ", argv[i]);
   printf("\n");
+  return 0;
+}
+
+/*
+ * @brief donne le type d'une commande
+ */
+char *type(int argc, char *argv[]) {
+  if (argc <= 1)
+    return 0;
+  if (get_command(argv[1]) == NOT_FOUND) {
+    printf("%s: not found\n", argv[1]);
+  } else {
+    printf("%s is a shell builtin\n", argv[1]);
+  };
   return 0;
 }
