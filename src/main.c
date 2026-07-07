@@ -6,9 +6,18 @@
 typedef enum {
   EXIT,
   NOT_FOUND,
+  ECHO,
 } Keywords;
 
+// Arguments recu de l'entree
+typedef struct {
+  char *argv[BUFSIZ];
+  int argc;
+} args;
+
+// --- Les functions (Prototypes) ---
 Keywords get_command(char *name);
+char *echo(int argc, char *argv[]);
 
 int main(int argc, char *argv[]) {
   // Flush after every printf
@@ -20,17 +29,15 @@ int main(int argc, char *argv[]) {
   printf("$ ");
   while (fgets(raw_input, sizeof(raw_input), stdin)) {
 
-    // Tableau contenant les mots dans l'entree
-    char *command[BUFSIZ];
-    int k = 0;
-
+    // Structure contenant les mots dans l'entree
+    args command;
     // Chaine de charactere representant le mot courant
     char token[FILENAME_MAX];
     token[0] = '\0';
     int j = 0;
 
     // Parse (elimine les espaces pour recupere uniquement les mots)
-    for (int i = 0;
+    for (int i = 0, k = 0;
          raw_input[i] != '\0' && k < BUFSIZ && j < (FILENAME_MAX - 1); i++) {
 
       if (!isspace((unsigned char)raw_input[i])) {
@@ -40,21 +47,26 @@ int main(int argc, char *argv[]) {
 
         if (token[0] != '\0') {
           token[j] = '\0';
-          command[k] = strdup(token);
+          command.argv[k] = strdup(token);
           k++;
         };
 
+        command.argc = k;
         j = 0;
       };
     };
 
-    if (command[0] != NULL && command[0][0] != '\0') {
-
-      switch (get_command(command[0])) {
+    if (command.argv[0] != NULL && command.argv[0][0] != '\0') {
+      // Execute
+      switch (get_command(command.argv[0])) {
       case EXIT:
         return 0;
       case NOT_FOUND:
-        printf("%s: command not found\n", command[0]);
+        printf("%s: command not found\n", command.argv[0]);
+        break;
+      case ECHO:
+        echo(command.argc, command.argv);
+        break;
       }
     };
 
@@ -70,5 +82,17 @@ int main(int argc, char *argv[]) {
 Keywords get_command(char *name) {
   if (strcmp(name, "exit") == 0)
     return EXIT;
+  if (strcmp(name, "echo") == 0)
+    return ECHO;
   return NOT_FOUND;
 };
+
+/*
+ * @brief affiche tour a tour les mots recu en arguments
+ */
+char *echo(int argc, char *argv[]) {
+  for (int i = 1; i < argc; i++)
+    printf("%s ", argv[i]);
+  printf("\n");
+  return 0;
+}
