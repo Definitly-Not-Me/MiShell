@@ -9,12 +9,7 @@ pkgs.mkShell {
     gdb
     pkg-config
     codecrafters-cli
-    (writeShellApplication {
-      name = "build";
-      runtimeInputs = [ pkgs.gcc ];
-      text = ''gcc "$@" -g -Wall -Wextra -o shell '';
-    })
-
+    cmake
   ];
 
   shellHook = ''
