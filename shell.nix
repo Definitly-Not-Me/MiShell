@@ -9,6 +9,13 @@ pkgs.mkShell {
     gdb
     pkg-config
     codecrafters-cli
+    writeShellApplication
+    {
+      name = "build";
+      nativeBuildInputs = [ pkgs.gcc ];
+      text = "gcc build -g -Wall -Wextra -fsanitize=address -o shell";
+    }
+
   ];
 
   shellHook = ''
