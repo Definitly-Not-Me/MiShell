@@ -1,3 +1,4 @@
+#include "logger.h"
 #include <ctype.h>
 #include <dirent.h>
 #include <stdio.h>
@@ -5,7 +6,6 @@
 #include <string.h>
 #include <strings.h>
 #include <unistd.h>
-
 #ifdef _WIN32
 #define PATH_LIST_SEPARATOR ';'
 #else
@@ -40,7 +40,7 @@ int main(void) {
 
   printf("$ ");
   while (fgets(raw_input, sizeof(raw_input), stdin)) {
-
+    log_info("Input received");
     // Structure contenant les arguments dans l'entree
     args command;
 
@@ -52,17 +52,21 @@ int main(void) {
     int j = 0;
 
     // Parse (elimine les espaces pour recupere uniquement les mots)
+    log_info("Parsing ...");
     for (int i = 0, k = 0;
          raw_input[i] != '\0' && k < BUFSIZ && j < (FILENAME_MAX - 1); i++) {
 
       if (!isspace((unsigned char)raw_input[i])) {
+        log_info("token num°%d: %c", j, raw_input[i]);
         token[j] = raw_input[i];
         j++;
       } else {
-
+        log_info("space detected");
         if (token[0] != '\0') {
           token[j] = '\0';
           command.argv[k] = strdup(token);
+          log_success("Arg num°%d successfully parsed: %s", i, token);
+          token[0] = '\0';
           k++;
         };
 
@@ -90,9 +94,15 @@ int main(void) {
 
     printf("$ ");
   };
+  log_success("Program successfully terminated");
   return 0;
 }
 
+/*
+ * @brief get substring ss of length l starting
+ * at index pos.
+ * Parce strcpy() est insecure
+ */
 void getSub(char *s, char *ss, int pos, int l) {
   int i = 0;
 
